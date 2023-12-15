@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/BRFirma-Bold.ttf",
+      "sha1": "abd6756a150076b39c5ad480f636adcca33b3a89"
+    },
+    {
+      "path": "src/assets/fonts/BRFirma-Light.ttf",
+      "sha1": "4d77cc59f1079fe1b7f837a0d88d3c004575d318"
+    },
+    {
+      "path": "src/assets/fonts/BRFirma-Medium.ttf",
+      "sha1": "aae1b880a5df61c7d5d32fe73302c4f9356f9add"
+    },
+    {
+      "path": "src/assets/fonts/BRFirma-Regular.ttf",
+      "sha1": "9a7677223a4ecb8dfc9da7d1d2cd79ba9777c0dc"
+    },
+    {
+      "path": "src/assets/fonts/BRFirma-SemiBold.ttf",
+      "sha1": "e1783716f35358461158032b85ac308dd4caf487"
+    }
+  ]
+}
