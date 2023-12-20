@@ -8,15 +8,20 @@ import Text from '@/components/Text';
 import { MainStack } from '@/utils/ParamList';
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, SafeAreaView, ScrollView } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import Toast from 'react-native-toast-message';
 import { useRunMutation } from '@/state/services/utils.service';
 import Geolocation from '@react-native-community/geolocation';
-import { addAlpha, logBaseUrl } from '@/utils/helpers';
-import { useTheme } from '@shopify/restyle';
-import { Theme } from '@/utils/theme';
+import { logBaseUrl } from '@/utils/helpers';
+// import { useTheme } from '@shopify/restyle';
+// import { Theme } from '@/utils/theme';
+import { useSettings } from '@/state/hooks/settings.hook';
+import { useDispatch } from 'react-redux';
+import { addLog } from '@/state/reducers/logs.reducer';
+import { Users } from '@/utils/types';
+import { useUsers } from '@/state/hooks/users.hook';
 
 interface Props {
   navigation: NativeStackNavigationProp<MainStack, 'SecurityScan'>;
@@ -26,10 +31,18 @@ interface Props {
 const SecurityScanScreen = ({ route, navigation }: Props) => {
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [reason, setReason] = useState(false);
+  const [localUser, setLocalUser] = useState<Users | undefined>(undefined);
   const [run, { isLoading: runLoading, error: runError, data: runData }] =
     useRunMutation();
-  const theme = useTheme<Theme>();
-  const { success, danger } = theme.colors;
+  // const theme = useTheme<Theme>();
+  // const { success, danger } = theme.colors;
+  const { offlineStatus } = useSettings();
+  const { users } = useUsers();
+  const dispatch = useDispatch();
+  const selectedUser = useMemo(
+    () => localUser || (runData as typeof localUser),
+    [localUser, runData],
+  );
 
   useEffect(() => {
     if (!route.params?.qrdata) {
@@ -42,16 +55,30 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
     } else {
       Geolocation.getCurrentPosition(
         info => {
-          run({
-            url: `${logBaseUrl}/api/staff/barcode`,
-            method: 'GET',
-            params: {
-              id: route.params?.qrdata,
-              Latitude: info.coords.latitude,
-              Longitude: info.coords.longitude,
-              Comment: 'User is authorized',
-            },
-          });
+          if (!offlineStatus) {
+            run({
+              url: `${logBaseUrl}/api/staff/barcode`,
+              method: 'GET',
+              params: {
+                id: route.params?.qrdata,
+                Latitude: info.coords.latitude,
+                Longitude: info.coords.longitude,
+                Comment: 'User is authorized',
+              },
+            });
+          } else {
+            dispatch(
+              addLog({
+                log: {
+                  id: route.params?.qrdata,
+                  Latitude: info.coords.latitude,
+                  Longitude: info.coords.longitude,
+                  Comment: 'User ',
+                },
+              }),
+            );
+            setLocalUser(users.find(u => u.id === route.params?.qrdata));
+          }
         },
         e => {
           Toast.show({
@@ -65,7 +92,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
         },
       );
     }
-  }, [run, route, navigation]);
+  }, [run, route, navigation, dispatch, offlineStatus, users]);
 
   useEffect(() => {
     if (runError) {
@@ -77,7 +104,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
         text2:
           (runError as any)?.error ||
           (runError as any)?.data?.message ||
-          'Something went wrong',
+          'Something went wrong with this scan',
         visibilityTime: 5000,
       });
       navigation.pop();
@@ -131,7 +158,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
               <Text variant="regular">Result: {route.params.qrdata}</Text>
             </Box>
           )} */}
-            {runData && (
+            {selectedUser && (
               <Box justifyContent="center">
                 <Box
                   marginBottom="l"
@@ -142,7 +169,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     FIRST NAME:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {runData && runData?.firstName}
+                    {selectedUser?.firstName}
                   </Text>
                 </Box>
                 <Box
@@ -154,7 +181,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     LAST NAME:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {runData && runData?.lastName}
+                    {selectedUser?.lastName}
                   </Text>
                 </Box>
                 <Box
@@ -166,7 +193,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     STAFF TYPE:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {(runData && runData?.staffType) || ''}
+                    {selectedUser?.staffType || ''}
                   </Text>
                 </Box>
                 {/* <Box
@@ -190,7 +217,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     DEPARTMENT:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {runData && runData?.department}
+                    {selectedUser?.department}
                   </Text>
                 </Box>
                 <Box
@@ -202,7 +229,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     COMPANY:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {runData && runData?.companyName}
+                    {selectedUser?.companyName}
                   </Text>
                 </Box>
                 <Box
@@ -214,7 +241,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     USER STATUS:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {runData && runData?.userStatus}
+                    {selectedUser?.userStatus}
                   </Text>
                 </Box>
                 <Box
@@ -226,10 +253,10 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                     REFINERY ZONE:
                   </Text>
                   <Text variant="regular" color="primary">
-                    {runData && runData?.refineryZones}
+                    {selectedUser?.refineryZones}
                   </Text>
                 </Box>
-                {runData && (
+                {/* {runData && (
                   <Box
                     marginTop="l"
                     borderWidth={2}
@@ -255,7 +282,7 @@ const SecurityScanScreen = ({ route, navigation }: Props) => {
                         : 'User is not authorized for this location'}
                     </Text>
                   </Box>
-                )}
+                )} */}
                 {/* <Box
               marginBottom="l"
               flexDirection="row"

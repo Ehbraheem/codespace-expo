@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import user from './reducers/user.reducer';
-// import { persistReducer } from 'redux-persist';
+import settings from './reducers/settings.reducer';
+import users from './reducers/users.reducer';
+import logs from './reducers/logs.reducer';
+import { persistReducer } from 'redux-persist';
 import { combineReducers } from 'redux';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserApi } from './services/user.service';
 import { JobApi } from './services/job.service';
 import { NotesApi } from './services/note.service';
@@ -17,15 +20,18 @@ import { VesselApi } from './services/vessel.service';
 import { SecurityApi } from './services/security.service';
 import { UtilsApi } from './services/utils.service';
 
-// const persistConfig = {
-//   key: 'root',
-//   version: 1,
-//   storage: AsyncStorage,
-//   whitelist: ['user', 'settings'],
-// };
+const persistConfig = {
+  key: 'root',
+  version: 1,
+  storage: AsyncStorage,
+  whitelist: ['users', 'settings', 'logs'],
+};
 
 const reducers = combineReducers({
   user,
+  settings,
+  users,
+  logs,
   [UserApi.reducerPath]: UserApi.reducer,
   [JobApi.reducerPath]: JobApi.reducer,
   [NotesApi.reducerPath]: NotesApi.reducer,
@@ -40,10 +46,10 @@ const reducers = combineReducers({
   [UtilsApi.reducerPath]: UtilsApi.reducer,
 });
 
-// const persistedReducer = persistReducer(persistConfig, reducers);
+const persistedReducer = persistReducer(persistConfig, reducers);
 
 export const store = configureStore({
-  reducer: reducers,
+  reducer: persistedReducer,
 
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({

@@ -270,6 +270,11 @@ export interface Users {
   isActive: true;
   businessUnit: number[];
   userType: number;
+  staffType: number | string;
+  department: number | string;
+  companyName: string;
+  userStatus: string;
+  refineryZones: string;
 }
 
 export interface Vessel {

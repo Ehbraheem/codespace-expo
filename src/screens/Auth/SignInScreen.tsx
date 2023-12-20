@@ -22,6 +22,8 @@ import { setCredentials } from '@/state/reducers/user.reducer';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+// import axios from 'axios';
+// import { getBaseUrl } from '@/utils/helpers';
 
 const schema = yup
   .object({
@@ -53,6 +55,18 @@ const SignInScreen = () => {
 
   const onSubmit = (cred: any) => {
     signin(cred);
+    // axios
+    //   .post(getBaseUrl() + '/authenticate/signin', cred)
+    //   .then(r => console.log(r))
+    //   .catch(e => console.log('axios error', e));
+    // axios
+    //   .get('https://jsonplaceholder.typicode.com/todos/1', {
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //   })
+    //   .then(rr => console.log(rr))
+    //   .catch(e => console.log('axios err:', e));
   };
 
   useEffect(() => {
@@ -93,7 +107,7 @@ const SignInScreen = () => {
       resizeMode="cover"
       style={{ height: Dimensions.get('window').height }}
       source={require('@/assets/images/sign-in.png')}>
-      <SafeAreaView style={{ flex: 1, borderWidth: 6 }}>
+      <SafeAreaView style={{ flex: 1 }}>
         <ScrollView
           style={{
             flex: 1,

@@ -1,5 +1,6 @@
 import Config from 'react-native-config';
 const { BASE_URL } = Config;
+// console.log('BASE_URL', BASE_URL);
 
 export const numberWithCommas = (x: number, decimals?: number) => {
   return x.toFixed(decimals || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -38,6 +39,7 @@ export const yearsDiff = (startDate: Date, endDate: Date) => {
 };
 
 export const getBaseUrl = () => {
+  // return 'https://api.test.dangote.islands.digital/api';
   return BASE_URL;
 };
 

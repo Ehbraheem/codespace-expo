@@ -19,9 +19,12 @@ export const UserApi = createApi({
   endpoints: builder => ({
     signIn: builder.mutation({
       query: body => ({
-        url: 'authenticate/signin',
+        url: '/authenticate/signin',
         method: 'POST',
         body,
+        headers: {
+          'Content-type': 'application/json',
+        },
       }),
     }),
   }),
