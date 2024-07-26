@@ -1,4 +1,11 @@
 {
   "name": "Tracker",
-  "displayName": "Tracker"
+  "displayName": "Tracker",
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "50105af5-5589-4537-8161-4d18edf6c532"
+      }
+    }
+  }
 }

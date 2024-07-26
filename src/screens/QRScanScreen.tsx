@@ -80,12 +80,12 @@ const QRScanScreen = ({ navigation }: Props) => {
     <View style={{ flex: 1 }}>
       {scan ? (
         <QRCodeScanner
-          onRead={e => {
-            setScan(false);
-            navigation.navigate('SecurityScan', {
-              qrdata: e.data,
-            });
-          }}
+          // onRead={e => {
+          //   setScan(false);
+          //   navigation.navigate('SecurityScan', {
+          //     qrdata: e.data,
+          //   });
+          // }}
           reactivate={false}
           showMarker={true}
           containerStyle={{ flex: 1 }}
