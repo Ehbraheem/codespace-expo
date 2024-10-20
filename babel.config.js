@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+  };
+=======
 module.exports = {
   presets: ['module:metro-react-native-babel-preset'],
   plugins: [
@@ -29,4 +36,5 @@ module.exports = {
       },
     ],
   ],
+>>>>>>> 0266927a39d5722575db0b06d3e0dfe6430df3f3
 };

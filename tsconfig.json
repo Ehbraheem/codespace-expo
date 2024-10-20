@@ -1,4 +1,21 @@
 {
+<<<<<<< HEAD
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
+=======
   "extends": "@react-native/typescript-config/tsconfig.json",
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
@@ -10,4 +27,5 @@
     },
     "typeRoots": ["./src/types", "./node_modules/@types"]
   }
+>>>>>>> 0266927a39d5722575db0b06d3e0dfe6430df3f3
 }
