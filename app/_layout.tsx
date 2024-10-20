@@ -1,37 +1,52 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * Generated with the TypeScript template
+ * https://github.com/react-native-community/react-native-template-typescript
+ *
+ * @format
+ */
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { store } from '@/state/store';
+import theme, { darkTheme } from '@/utils/theme';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider, useTheme } from '@shopify/restyle';
+import React from 'react';
+import { LogBox, Platform, StatusBar } from 'react-native';
+import Toast from 'react-native-toast-message';
+import { Provider } from 'react-redux';
+import MainStack from '@/app/(tabs)/_layout';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+LogBox.ignoreLogs(['ViewPropTypes will be removed from React Native']);
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
+const App = () => {
+  const themex = useTheme();
+  const { background, primary } = themex.colors;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={false ? theme : darkTheme}>
+        <NavigationContainer
+          theme={{
+            ...DefaultTheme,
+            colors: {
+              ...DefaultTheme.colors,
+              background: background,
+            },
+          }}
+          independent={true} // Mark this NavigationContainer as independent
+          >
+          <MainStack />
+          <Toast />
+          <StatusBar
+            backgroundColor={primary}
+            barStyle={Platform.OS === 'ios' ? 'dark-content' : 'light-content'}
+          />
+        </NavigationContainer>
+      </ThemeProvider>
+    </Provider>
   );
-}
+};
+
+export default App;

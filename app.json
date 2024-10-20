@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#03225E"
     },
     "ios": {
       "supportsTablet": true
@@ -18,8 +18,15 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "backgroundColor": "#03225E"
+      },
+      "package": "com.joybad.trackerapp",
+      "permissions": [
+        "CAMERA", 
+        "READ_EXTERNAL_STORAGE", 
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "hardwareKeyboardLayout": "qwerty"
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +38,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "117c5644-9bf8-4e17-8d98-bd69036bd338"
+      }
     }
   }
 }
