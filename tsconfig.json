@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
@@ -14,4 +15,17 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]
+=======
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+    /* Completeness */
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  }
+>>>>>>> 0266927a39d5722575db0b06d3e0dfe6430df3f3
 }

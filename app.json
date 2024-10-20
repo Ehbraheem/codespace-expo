@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "expo": {
     "name": "tracker-app",
     "slug": "tracker-app",
@@ -45,6 +46,14 @@
       },
       "eas": {
         "projectId": "117c5644-9bf8-4e17-8d98-bd69036bd338"
+=======
+  "name": "Tracker",
+  "displayName": "Tracker",
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "50105af5-5589-4537-8161-4d18edf6c532"
+>>>>>>> 0266927a39d5722575db0b06d3e0dfe6430df3f3
       }
     }
   }
