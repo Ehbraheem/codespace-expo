@@ -166,3 +166,32 @@ export const UserStatus = [
   'Expired',
   'Exited',
 ];
+
+export const extendedFetch = async (
+  url: string,
+  { timeout = 5000, ...fetchOptions }: RequestInit & { timeout?: number } = {},
+) => {
+  const controller = new AbortController();
+
+  const abort = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  const response = await globalThis.fetch(url, {
+    ...fetchOptions,
+    signal: controller.signal,
+  });
+
+  clearTimeout(abort);
+  return response;
+};
+
+export const humaniveVerification = (result: 'true' | 'false') => {
+  switch (result) {
+    case 'true':
+    case 'false': // Capitalize the first letter
+      return `${result.charAt(0).toUpperCase()}${result.slice(1)}`;
+    default:
+      return 'Indeterminate';
+  }
+};

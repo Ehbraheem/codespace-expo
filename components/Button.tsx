@@ -29,13 +29,14 @@ const Button = ({
 }: Props) => {
   const theme = useTheme<Theme>();
   const { white } = theme.colors;
+  const isDisabled = disabled || loading;
 
   return (
     <Box width="100%" {...containerProps}>
-      <TouchableOpacity disabled={disabled || loading} onPress={onPress}>
+      <TouchableOpacity disabled={isDisabled} onPress={onPress}>
         <Box
           height={50}
-          backgroundColor="secondary"
+          backgroundColor={isDisabled ? 'disabled' : 'secondary'}
           flexDirection="row"
           justifyContent="center"
           borderRadius={6}

@@ -15,6 +15,7 @@ import { useDispatch } from 'react-redux';
 import { addLog } from '@/state/reducers/logs.reducer';
 import { useUsers } from '@/state/hooks/users.hook';
 import { Users } from '@/utils/types';
+import { randomUUID } from 'expo-crypto';
 
 const SecurityScanScreen = () => {
   const router = useRouter(); // Access router
@@ -24,14 +25,15 @@ const SecurityScanScreen = () => {
   const [reason, setReason] = useState(false);
   const [localUser, setLocalUser] = useState<Users | undefined>(undefined);
 
-  const [run, { isLoading: runLoading, error: runError, data: runData }] = useRunMutation();
+  const [run, { isLoading: runLoading, error: runError, data: runData }] =
+    useRunMutation();
   const { offlineStatus } = useSettings();
   const { users } = useUsers();
   const dispatch = useDispatch();
 
   const selectedUser = useMemo(
     () => localUser || (runData as typeof localUser),
-    [localUser, runData]
+    [localUser, runData],
   );
 
   useEffect(() => {
@@ -67,12 +69,15 @@ const SecurityScanScreen = () => {
         dispatch(
           addLog({
             log: {
-              id: qrdata,
-              Latitude: latitude,
-              Longitude: longitude,
-              Comment: 'User authorized (offline)',
+              latitude,
+              longitude,
+              logEntryId: randomUUID(),
+              staffId: qrdata,
+              barCodeId: qrdata,
+              comment: 'User authorized (offline)',
+              offline: new Date().toISOString(),
             },
-          })
+          }),
         );
         setLocalUser(users.find(u => u.id === qrdata));
       }
@@ -84,7 +89,9 @@ const SecurityScanScreen = () => {
   useEffect(() => {
     if (runError) {
       console.error(
-        (runError as any)?.error || (runError as any)?.data?.message || 'Something went wrong with this scan'
+        (runError as any)?.error ||
+          (runError as any)?.data?.message ||
+          'Something went wrong with this scan',
       );
       router.back();
     }
@@ -100,7 +107,11 @@ const SecurityScanScreen = () => {
     <SafeAreaView style={{ flex: 1 }}>
       <Loader visible={runLoading} />
       <Box flex={1}>
-        <Box height={200} backgroundColor="primary" justifyContent="center" alignItems="center">
+        <Box
+          height={200}
+          backgroundColor="primary"
+          justifyContent="center"
+          alignItems="center">
           <Box
             height={60}
             width={60}
@@ -108,8 +119,7 @@ const SecurityScanScreen = () => {
             borderRadius={40}
             overflow="hidden"
             justifyContent="center"
-            alignItems="center"
-          >
+            alignItems="center">
             {!runData ? (
               <Feather name="user" size={28} color="#000000" />
             ) : (
@@ -127,22 +137,44 @@ const SecurityScanScreen = () => {
             <Box></Box>
             {selectedUser && (
               <Box justifyContent="center">
-                <Box marginBottom="l" flexDirection="row" justifyContent="space-between" alignItems="center">
-                  <Text variant="medium" color="primary">FIRST NAME: </Text>
-                  <Text variant="regular" color="primary">{selectedUser?.firstName}</Text>
+                <Box
+                  marginBottom="l"
+                  flexDirection="row"
+                  justifyContent="space-between"
+                  alignItems="center">
+                  <Text variant="medium" color="primary">
+                    FIRST NAME:{' '}
+                  </Text>
+                  <Text variant="regular" color="primary">
+                    {selectedUser?.firstName}
+                  </Text>
                 </Box>
-                <Box marginBottom="l" flexDirection="row" justifyContent="space-between" alignItems="center">
-                  <Text variant="medium" color="primary">LAST NAME: </Text>
-                  <Text variant="regular" color="primary">{selectedUser?.lastName}</Text>
+                <Box
+                  marginBottom="l"
+                  flexDirection="row"
+                  justifyContent="space-between"
+                  alignItems="center">
+                  <Text variant="medium" color="primary">
+                    LAST NAME:{' '}
+                  </Text>
+                  <Text variant="regular" color="primary">
+                    {selectedUser?.lastName}
+                  </Text>
                 </Box>
               </Box>
             )}
             <Box>
               <Box marginBottom="m">
-                <Button displayText="Verify" onPress={() => setVerifyOpen(true)} />
+                <Button
+                  displayText="Verify"
+                  onPress={() => setVerifyOpen(true)}
+                />
               </Box>
               <Box marginBottom="m">
-                <Button displayText="Open Reason Modal" onPress={() => setReason(true)} />
+                <Button
+                  displayText="Open Reason Modal"
+                  onPress={() => setReason(true)}
+                />
               </Box>
             </Box>
           </Box>

@@ -19,6 +19,7 @@ const palette = {
   foreground_light: '#000000',
   danger: '#A50000',
   success: '#1B9863',
+  disabled: '#EC1B2E80',
 };
 
 export const theme = createTheme({
@@ -35,6 +36,7 @@ export const theme = createTheme({
     success: palette.success,
     danger: palette.danger,
     label: palette.label_light,
+    disabled: palette.disabled,
   },
   spacing: {
     xs: 4,
