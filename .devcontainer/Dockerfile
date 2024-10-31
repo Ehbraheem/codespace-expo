@@ -17,19 +17,9 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
-  ANDROID_SDK_ROOT=/opt/android-sdk \
-  ANDROID_HOME=/opt/android-sdk \
-  APPIUM_PORT=4723 \
-  PATH=${PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools \
-  PATH=${PATH}:/opt/scripts \
-  EMU=/start_emu.sh \
-  EMU_HEADLESS=/start_emu_headless.sh \
-  VNC=/start_vnc.sh \
-  APPIUM=/start_appium.sh
-
-# Create directory structure
-WORKDIR ${ANDROID_SDK_ROOT}
-RUN mkdir -p cmdline-tools
+  ANDROID_SDK_ROOT=/home/$USERNAME/Android/Sdk \
+  PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools \
+  PATH=${PATH}:/opt/scripts
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -56,15 +46,16 @@ RUN apt-get update && apt-get install -y \
 USER $USERNAME
 
 # Setup Android SDK
-RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
-  unzip tools.zip -d cmdline-tools && \
-  mv cmdline-tools/cmdline-tools cmdline-tools/latest && \
+RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools && \
+  wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
+  unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools && \
+  mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest && \
   rm tools.zip
 
 
 # Install Node.js packages
-RUN npm install -g eas-cli expo-cli appium --unsafe-perm=true --allow-root && \
-  appium driver install uiautomator2
+RUN sudo npm install -g eas-cli expo-cli appium --unsafe-perm=true --allow-root && \
+  sudo appium driver install uiautomator2
 
 
 # Setup Android tools and accept licenses
@@ -81,7 +72,11 @@ RUN yes Y | sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT} && \
 ARG EMULATOR_NAME="nexus"
 ARG EMULATOR_DEVICE="Nexus 6"
 ENV EMULATOR_NAME=${EMULATOR_NAME} \
-  DEVICE_NAME=${EMULATOR_DEVICE}
+  DEVICE_NAME=${EMULATOR_DEVICE} \
+  EMU=/opt/scripts/start_emu.sh \
+  EMU_HEADLESS=/opt/scripts/start_emu_headless.sh \
+  VNC=/opt/scripts/start_vnc.sh \
+  APPIUM=/opt/scripts/start_appium.sh
 
 RUN echo "no" | avdmanager create avd \
   --force \
@@ -92,22 +87,18 @@ RUN echo "no" | avdmanager create avd \
 
 
 # Copy and setup scripts
-COPY scripts/ /opt/scripts/
-RUN sudo chmod +x /opt/scripts/*.sh
+COPY --chown=$USERNAME:$USERNAME scripts/ /opt/scripts/
+RUN sudo chmod +x /opt/scripts/*.sh \
+  echo "alias emu='${EMU}'" >> ~/.bashrc && \
+  echo "alias vnc='${VNC}'" >> ~/.bashrc && \
+  echo "alias appium='${APPIUM}'" >> ~/.bashrc
 
-#=========================
-# Copying Scripts to root
-#=========================
-WORKDIR /app
 
-COPY . /
-
+WORKDIR /workspaces
 
 # Expose ports
 EXPOSE 5900 \
-  4723 4724 4725 4726 4727 4728 \
-  5037 \
-  5554 \
-  5555 \
-  5556
+  5554-5556 \
+  4723-4728 \
+  5037
 

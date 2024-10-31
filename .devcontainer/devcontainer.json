@@ -27,7 +27,8 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "msjsdiag.vscode-react-native",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -45,10 +46,10 @@
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.android,target=/home/vscode/.android,type=bind,consistency=cached"
   ],
   "remoteEnv": {
-    "ANDROID_SDK_ROOT": "/opt/android-sdk",
-    "ANDROID_HOME": "/opt/android-sdk",
+    "ANDROID_SDK_ROOT": "/home/vscode/Android/Sdk",
+    "ANDROID_HOME": "/home/vscode/Android/Sdk",
     "REACT_NATIVE_PACKAGER_HOSTNAME": "127.0.0.1",
-    "PATH": "${containerEnv:PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools"
+    "PATH": "${containerEnv:PATH}:/home/vscode/Android/Sdk/cmdline-tools/latest/bin:/home/vscode/Android/Sdk/platform-tools"
   },
   "postCreateCommand": "npm install && npx expo install && npx expo prebuild --clean --platform android -y",
   "forwardPorts": [
@@ -61,5 +62,6 @@
     5554, // Emulator
     5555, // Emulator ADB
     5900 // VNC
-  ]
+  ],
+  "postStartCommand": "npx expo run:android"
 }
