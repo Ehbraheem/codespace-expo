@@ -2,12 +2,26 @@ FROM mcr.microsoft.com/devcontainers/universal:latest
 
 LABEL maintainer "Bolatan Ibrahim"
 
+# Create non-root user
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME \
+  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+  && apt-get update \
+  && apt-get install -y sudo \
+  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+  && chmod 0440 /etc/sudoers.d/$USERNAME
+
 # Environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
   ANDROID_SDK_ROOT=/opt/android-sdk \
   ANDROID_HOME=/opt/android-sdk \
   APPIUM_PORT=4723 \
   PATH=${PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools \
+  PATH=${PATH}:/opt/scripts \
   EMU=/start_emu.sh \
   EMU_HEADLESS=/start_emu_headless.sh \
   VNC=/start_vnc.sh \
@@ -39,6 +53,7 @@ RUN apt-get update && apt-get install -y \
   libdbus-glib-1-2 \
   && rm -rf /var/lib/apt/lists/*
 
+USER $USERNAME
 
 # Setup Android SDK
 RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
@@ -53,8 +68,8 @@ RUN npm install -g eas-cli expo-cli appium --unsafe-perm=true --allow-root && \
 
 
 # Setup Android tools and accept licenses
-RUN yes Y | cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT} && \
-  cmdline-tools/latest/bin/sdkmanager --verbose --no_https \
+RUN yes Y | sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT} && \
+  sdkmanager --verbose \
   "platform-tools" \
   "platforms;android-34" \
   "build-tools;34.0.0" \
@@ -68,21 +83,17 @@ ARG EMULATOR_DEVICE="Nexus 6"
 ENV EMULATOR_NAME=${EMULATOR_NAME} \
   DEVICE_NAME=${EMULATOR_DEVICE}
 
-RUN echo "no" | cmdline-tools/latest/bin/avdmanager --verbose create avd \
+RUN echo "no" | avdmanager create avd \
   --force \
   --name "${EMULATOR_NAME}" \
   --device "${EMULATOR_DEVICE}" \
   --package "system-images;android-34;google_apis;x86_64"
 
 
-# Copy and setup scripts
-COPY start_*.sh /
-RUN chmod a+x /start_*.sh
 
-#===================
-# Ports
-#===================
-ENV APPIUM_PORT=4723
+# Copy and setup scripts
+COPY scripts/ /opt/scripts/
+RUN sudo chmod +x /opt/scripts/*.sh
 
 #=========================
 # Copying Scripts to root

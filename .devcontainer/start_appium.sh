@@ -11,11 +11,11 @@ function start_appium () {
     then
     printf "${G}==>  ${YE}No port provided, instance will run on 4723 ${G}<==${NC}""\n"
     sleep 0.5
-    appium
+    appium --allow-insecure chromedriver_autodownload
     else
     printf "${G}==>  ${BL}Instance will run on ${YE}${APPIUM_PORT} ${G}<==${NC}""\n"
     sleep 0.5
-    appium -p $APPIUM_PORT
+    appium --allow-insecure chromedriver_autodownload -p $APPIUM_PORT
     fi
 };
 
