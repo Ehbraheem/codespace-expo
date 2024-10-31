@@ -2,38 +2,82 @@ FROM mcr.microsoft.com/devcontainers/universal:latest
 
 LABEL maintainer "Bolatan Ibrahim"
 
-ENV DEBIAN_FRONTEND noninteractive
+# Environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+  ANDROID_SDK_ROOT=/opt/android-sdk \
+  ANDROID_HOME=/opt/android-sdk \
+  APPIUM_PORT=4723 \
+  PATH=${PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools \
+  EMU=/start_emu.sh \
+  EMU_HEADLESS=/start_emu_headless.sh \
+  VNC=/start_vnc.sh \
+  APPIUM=/start_appium.sh
 
-WORKDIR $HOME/Android/Sdk/cmdline-tools
-# Install additional packages
-RUN sudo apt-get update && \
-    sudo apt install -y curl sudo wget unzip bzip2 libdrm-dev libxkbcommon-dev libgbm-dev libasound-dev libnss3 libxcursor1 libpulse-dev libxshmfence-dev xauth xvfb x11vnc fluxbox wmctrl libdbus-glib-1-2 && \
-    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
-    unzip tools.zip -d ~/Android/Sdk && \
-    rm tools.zip && \
-    npm install -g eas-cli expo-cli appium --unsafe-perm=true --allow-root && \
-    appium driver install uiautomator2 && \
-    yes Y | ./bin/sdkmanager --licenses --sdk_root=. && \
-    echo "export ANDROID_SDK_ROOT=$HOME/Android/Sdk" >> ~/.bashrc && \
-    echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> ~/.bashrc && \
-    echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/platform-tools" >> ~/.bashrc && \
-    yes Y | ./bin/sdkmanager --verbose --no_https "platform-tools" "platforms;android-34" "build-tools;34" "system-images;android-34.0.0;google_apis;x86_64" "emulator" "ndk-bundle"
+# Create directory structure
+WORKDIR ${ANDROID_SDK_ROOT}
+RUN mkdir -p cmdline-tools
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+  curl \
+  wget \
+  unzip \
+  bzip2 \
+  libdrm-dev \
+  libxkbcommon-dev \
+  libgbm-dev \
+  libasound-dev \
+  libnss3 \
+  libxcursor1 \
+  libpulse-dev \
+  libxshmfence-dev \
+  xauth \
+  xvfb \
+  x11vnc \
+  fluxbox \
+  wmctrl \
+  libdbus-glib-1-2 \
+  && rm -rf /var/lib/apt/lists/*
 
 
-# Create the emulator
+# Setup Android SDK
+RUN wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
+  unzip tools.zip -d cmdline-tools && \
+  mv cmdline-tools/cmdline-tools cmdline-tools/latest && \
+  rm tools.zip
+
+
+# Install Node.js packages
+RUN npm install -g eas-cli expo-cli appium --unsafe-perm=true --allow-root && \
+  appium driver install uiautomator2
+
+
+# Setup Android tools and accept licenses
+RUN yes Y | cmdline-tools/latest/bin/sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT} && \
+  cmdline-tools/latest/bin/sdkmanager --verbose --no_https \
+  "platform-tools" \
+  "platforms;android-34" \
+  "build-tools;34.0.0" \
+  "system-images;android-34;google_apis;x86_64" \
+  "emulator" \
+  "ndk-bundle"
+
+# Configure emulator
 ARG EMULATOR_NAME="nexus"
 ARG EMULATOR_DEVICE="Nexus 6"
-ENV EMULATOR_NAME=$EMULATOR_NAME
-ENV DEVICE_NAME=$EMULATOR_DEVICE
-RUN echo "no" | ./bin/avdmanager --verbose create avd --force --name "${EMULATOR_NAME}" --device "${EMULATOR_DEVICE}" --package "${EMULATOR_PACKAGE}"
+ENV EMULATOR_NAME=${EMULATOR_NAME} \
+  DEVICE_NAME=${EMULATOR_DEVICE}
 
-#===================
-# Alias
-#===================
-ENV EMU=./start_emu.sh
-ENV EMU_HEADLESS=./start_emu_headless.sh
-ENV VNC=./start_vnc.sh
-ENV APPIUM=./start_appium.sh
+RUN echo "no" | cmdline-tools/latest/bin/avdmanager --verbose create avd \
+  --force \
+  --name "${EMULATOR_NAME}" \
+  --device "${EMULATOR_DEVICE}" \
+  --package "system-images;android-34;google_apis;x86_64"
+
+
+# Copy and setup scripts
+COPY start_*.sh /
+RUN chmod a+x /start_*.sh
 
 #===================
 # Ports
@@ -43,14 +87,16 @@ ENV APPIUM_PORT=4723
 #=========================
 # Copying Scripts to root
 #=========================
+WORKDIR /app
+
 COPY . /
 
-RUN chmod a+x start_vnc.sh && \
-    chmod a+x start_emu.sh && \
-    chmod a+x start_appium.sh && \
-    chmod a+x start_emu_headless.sh
 
-#=======================
-# framework entry point
-#=======================
-CMD [ "/bin/bash" ]
+# Expose ports
+EXPOSE 5900 \
+  4723 4724 4725 4726 4727 4728 \
+  5037 \
+  5554 \
+  5555 \
+  5556
+

@@ -1,18 +1,65 @@
 {
+  "name": "React Native Development Environment",
   "build": {
-    "dockerfile": "Dockerfile",
+    "dockerfile": "./Dockerfile",
     "context": ".",
     "args": {
       "EMULATOR_DEVICE": "Nexus 6",
       "EMULATOR_NAME": "nexus"
+    },
+    "features": {
+      "ghcr.io/devcontainers/features/java:1": {
+        "version": "17",
+        "installGradle": true
+      },
+      "ghcr.io/devcontainers/features/node:1": {
+        "version": "18"
+      }
+    },
+    "customizations": {
+      "extensions": [
+        "ms-vscode-remote.remote-containers",
+        "github.vscode-codespaces",
+        "GitHub.copilot-nightly",
+        "vscjava.vscode-java-pack",
+        "redhat.java",
+        "visualstudioexptteam.vscodeintellicode",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "msjsdiag.vscode-react-native",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
     }
   },
-  "customization": {
-    "extensions": [
-      "ms-vscode-remote.remote-containers",
-      "github.vscode-codespaces",
-      "GitHub.copilot-nightly"
-    ]
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.android,target=/home/vscode/.android,type=bind,consistency=cached"
+  ],
+  "remoteEnv": {
+    "ANDROID_SDK_ROOT": "/opt/android-sdk",
+    "ANDROID_HOME": "/opt/android-sdk",
+    "REACT_NATIVE_PACKAGER_HOSTNAME": "127.0.0.1",
+    "PATH": "${containerEnv:PATH}:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools"
   },
-  "postCreateCommand": "npm install && npx expo prebuild --clean --platform android -y"
+  "postCreateCommand": "npm install && npx expo install && npx expo prebuild --clean --platform android -y",
+  "forwardPorts": [
+    8081, // Metro bundler
+    19000, // Expo
+    19001, // Expo
+    19002, // Expo DevTools
+    4723, // Appium
+    5037, // ADB
+    5554, // Emulator
+    5555, // Emulator ADB
+    5900 // VNC
+  ]
 }
