@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 node_modules/
 .expo/
 dist/
@@ -19,7 +18,6 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
-=======
 # OSX
 #
 .DS_Store
@@ -86,4 +84,6 @@ yarn-error.log
 
 # testing
 /coverage
->>>>>>> 0266927a39d5722575db0b06d3e0dfe6430df3f3
+
+/ios
+/android
