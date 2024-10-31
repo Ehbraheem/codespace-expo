@@ -1,0 +1,18 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".",
+    "args": {
+      "EMULATOR_DEVICE": "Nexus 6",
+      "EMULATOR_NAME": "nexus"
+    }
+  },
+  "customization": {
+    "extensions": [
+      "ms-vscode-remote.remote-containers",
+      "github.vscode-codespaces",
+      "GitHub.copilot-nightly"
+    ]
+  },
+  "postCreateCommand": "npm install && npx expo prebuild --clean --platform android -y"
+}
