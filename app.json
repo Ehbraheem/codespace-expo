@@ -1,12 +1,11 @@
 {
-<<<<<<< HEAD
   "expo": {
     "name": "tracker-app",
     "slug": "tracker-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "tracker-app",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -14,20 +13,26 @@
       "backgroundColor": "#03225E"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to your camera.",
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library."
+      },
+      "bundleIdentifier": "com.limebit.trackerapp",
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#03225E"
       },
-      "package": "com.joybad.trackerapp",
+      "package": "com.limebit.trackerapp",
       "permissions": [
-        "CAMERA", 
-        "READ_EXTERNAL_STORAGE", 
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
-      ],
-      "hardwareKeyboardLayout": "qwerty"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +40,23 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "react-native-permissions",
+        {
+          "iosPermissions": [
+            "Camera",
+            "LocationWhenInUse",
+            "PhotoLibrary"
+          ],
+          "androidPermissions": [
+            "CAMERA",
+            "ACCESS_FINE_LOCATION",
+            "READ_EXTERNAL_STORAGE",
+            "WRITE_EXTERNAL_STORAGE"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -45,15 +66,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "117c5644-9bf8-4e17-8d98-bd69036bd338"
-=======
-  "name": "Tracker",
-  "displayName": "Tracker",
-  "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "50105af5-5589-4537-8161-4d18edf6c532"
->>>>>>> 0266927a39d5722575db0b06d3e0dfe6430df3f3
+        "projectId": "cffab7e6-7ba3-4881-ba19-0265900c0693"
       }
     }
   }
