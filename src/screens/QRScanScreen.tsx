@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, PermissionsAndroid, Switch } from 'react-native';
 import Toast from 'react-native-toast-message';
+// TODO: Migrate to expo-camera. See example implementation in app/(main)/QRScanScreen.tsx for reference
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import Text from '@/components/Text';
 import { useLogs } from '@/state/hooks/logs.hook';

@@ -1,5 +1,4 @@
-import Config from 'react-native-config';
-const { BASE_URL } = Config;
+const BASE_URL = process.env.BASE_URL;
 // console.log('BASE_URL', BASE_URL);
 
 export const numberWithCommas = (x: number, decimals?: number) => {

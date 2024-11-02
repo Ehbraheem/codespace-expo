@@ -164,11 +164,17 @@ const QRScanScreen = ({ navigation }: Props) => {
         (await AsyncStorage.getItem('recordData')) || '[]',
       );
       console.log('Storing record....'); // Log the data before storing
-      const allRecords = new Set([...existingRecords, ...data]); // Combine existing and new data
+
+      const allRecords = [
+        ...new Set([...existingRecords, ...data].map(JSON.stringify)),
+      ].map(JSON.parse); // Combine existing and new data
+
       await AsyncStorage.setItem('recordData', JSON.stringify([...allRecords]));
-      setOfflineData([...allRecords]); // Update the local state with the new data
       console.log(`Stored ${data.length} records successfully`);
+
+      setOfflineData(allRecords); // Update the local state with the new data
       console.log(`Total records available locally: ${allRecords.length}`);
+
       console.log('Record stored successfully');
     } catch (error) {
       console.error('Error storing record:', error.message);
@@ -220,8 +226,8 @@ const QRScanScreen = ({ navigation }: Props) => {
     } catch (error) {
       console.error('Error uploading record:', error);
       setErrorMessage('Failed to upload record.');
-      setModalVisible(true); // Show modal on error
     } finally {
+      setModalVisibles(true); // Show modal on error
       setUploading(false); // Set uploading to false when done
     }
   };
