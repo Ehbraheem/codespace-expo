@@ -55,7 +55,7 @@
     "REACT_NATIVE_PACKAGER_HOSTNAME": "127.0.0.1",
     "PATH": "${containerEnv:PATH}:/home/vscode/Android/Sdk/cmdline-tools/latest/bin:/home/vscode/Android/Sdk/platform-tools"
   },
-  "postCreateCommand": "npm install && npx expo install && npx expo prebuild --clean --platform android -y",
+  "postCreateCommand": "/opt/scripts/post-create.sh",
   "forwardPorts": [
     8081, // Metro bundler
     19000, // Expo
@@ -67,5 +67,8 @@
     5555, // Emulator ADB
     5900 // VNC
   ],
-  "postStartCommand": "npx expo run:android"
+  "postStartCommand": "npx expo run:android",
+  "runArgs": ["--privileged"],
+  "overrideCommand": false,
+  "updateRemoteUserUID": true
 }

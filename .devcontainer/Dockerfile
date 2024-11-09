@@ -4,69 +4,93 @@ LABEL maintainer "Bolatan Ibrahim"
 
 # Create non-root user
 ARG USERNAME=vscode
-ARG USER_UID=1000
+ARG USER_UID=1001
 ARG USER_GID=$USER_UID
-
-# Create the user
-RUN groupadd --gid $USER_GID $USERNAME \
-  && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-  && apt-get update \
-  && apt-get install -y sudo \
-  && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-  && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # Environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
   ANDROID_SDK_ROOT=/home/$USERNAME/Android/Sdk \
-  PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools \
-  PATH=${PATH}:/opt/scripts
+  QT_DEBUG_PLUGINS=1 \
+  DISPLAY=:99
+
+ENV ANDROID_AVD_HOME=/home/$USERNAME/.android/avd \
+  ANDROID_HOME=$ANDROID_SDK_ROOT
+
+ENV PATH=${PATH}:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:/opt/scripts
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-  curl \
-  wget \
-  unzip \
-  bzip2 \
-  libdrm-dev \
-  libxkbcommon-dev \
-  libgbm-dev \
-  libasound-dev \
-  libnss3 \
-  libxcursor1 \
-  libpulse-dev \
-  libxshmfence-dev \
-  xauth \
-  xvfb \
-  x11vnc \
-  fluxbox \
-  wmctrl \
-  libdbus-glib-1-2 \
-  && rm -rf /var/lib/apt/lists/*
+    # Core utilities
+    curl \
+    wget \
+    unzip \
+    # KVM essentials
+    qemu-kvm \
+    libvirt-daemon-system \
+    # X11 and display core
+    libdrm-dev \
+    libxkbcommon-dev \
+    libnss3 \
+    libxcursor1 \
+    xauth \
+    xvfb \
+    x11vnc \
+    # Qt dependencies
+    libxcb-cursor0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-randr0 \
+    qt5-default \
+    && rm -rf /var/lib/apt/lists/*
 
+
+# Create the user and add to KVM group
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && usermod -aG kvm $USERNAME \
+    && usermod -aG libvirt $USERNAME \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && mkdir -p /workspaces \
+    && chown -R $USERNAME:$USERNAME /workspaces
+
+# Set KVM permissions
+RUN mkdir -p /dev/kvm \
+    && chown root:kvm /dev/kvm \
+    && chmod 660 /dev/kvm
+
+# Switch to user and setup Android SDK
 USER $USERNAME
+WORKDIR /home/$USERNAME
 
-# Setup Android SDK
+# Download and setup Android SDK
 RUN mkdir -p $ANDROID_SDK_ROOT/cmdline-tools && \
-  wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
-  unzip tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools && \
-  mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest && \
-  rm tools.zip
+    cd $ANDROID_SDK_ROOT/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip && \
+    unzip tools.zip && \
+    mv cmdline-tools latest && \
+    rm tools.zip
+
+
+# Accept licenses and install Android components
+RUN cd $ANDROID_SDK_ROOT/cmdline-tools/latest/bin && \
+    yes Y | ./sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT && \
+    ./sdkmanager --verbose \
+    "platform-tools" \
+    "platforms;android-34" \
+    "build-tools;34.0.0" \
+    "system-images;android-34;google_apis;x86_64" \
+    "emulator" \
+    "ndk-bundle"
 
 
 # Install Node.js packages
 RUN sudo npm install -g eas-cli expo-cli appium --unsafe-perm=true --allow-root && \
   sudo appium driver install uiautomator2
 
-
-# Setup Android tools and accept licenses
-RUN yes Y | sdkmanager --licenses --sdk_root=${ANDROID_SDK_ROOT} && \
-  sdkmanager --verbose \
-  "platform-tools" \
-  "platforms;android-34" \
-  "build-tools;34.0.0" \
-  "system-images;android-34;google_apis;x86_64" \
-  "emulator" \
-  "ndk-bundle"
 
 # Configure emulator
 ARG EMULATOR_NAME="nexus"
@@ -78,7 +102,8 @@ ENV EMULATOR_NAME=${EMULATOR_NAME} \
   VNC=/opt/scripts/start_vnc.sh \
   APPIUM=/opt/scripts/start_appium.sh
 
-RUN echo "no" | avdmanager create avd \
+RUN cd $ANDROID_SDK_ROOT/cmdline-tools/latest/bin && \
+  echo "no" | ./avdmanager create avd \
   --force \
   --name "${EMULATOR_NAME}" \
   --device "${EMULATOR_DEVICE}" \
@@ -88,7 +113,8 @@ RUN echo "no" | avdmanager create avd \
 
 # Copy and setup scripts
 COPY --chown=$USERNAME:$USERNAME scripts/ /opt/scripts/
-RUN sudo chmod +x /opt/scripts/*.sh \
+
+RUN sudo chmod +x /opt/scripts/*.sh && \
   echo "alias emu='${EMU}'" >> ~/.bashrc && \
   echo "alias vnc='${VNC}'" >> ~/.bashrc && \
   echo "alias appium='${APPIUM}'" >> ~/.bashrc
